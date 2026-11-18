@@ -1,5 +1,8 @@
 # Predicting Student Performance using Supervised Learning
 
+**Live Interactive Demo:** https://lipaksh3.github.io/student-performance-prediction/  
+**Run Notebook in Google Colab:** [Open in Colab](https://colab.research.google.com/github/Lipaksh3/student-performance-prediction/blob/main/notebooks/student_performance_analysis.ipynb)
+
 A clean, beginner-friendly Machine Learning project that uses **Supervised Learning** algorithms to predict:
 1. **Final Exam Score** (Regression) — numeric score out of 100
 2. **Exam Result** (Classification) — `Pass` or `Fail`

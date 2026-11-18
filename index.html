@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Performance Predictor | Supervised Learning</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --warn: #d97706;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #ffffff;
+      padding: 2.5rem 1.25rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #dbeafe;
+      max-width: 660px;
+      margin: 0 auto 1.25rem;
+      font-size: 1rem;
+    }
+
+    .header-links {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-link {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-link:hover { opacity: 0.9; }
+    .btn-light { background: #ffffff; color: #1e3a8a; }
+    .btn-outline { border: 1.5px solid rgba(255,255,255,0.7); color: #ffffff; }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3.5rem;
+    }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .grid-main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .presets {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .preset-btn {
+      background: #eff6ff;
+      color: var(--primary-dark);
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .preset-btn:hover { background: #dbeafe; }
+
+    .control {
+      margin-bottom: 1.1rem;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .control-value {
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0.9rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 0.5rem;
+    }
+
+    .toggle-row label {
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .result-box {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .score-number {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+      margin: 0.35rem 0;
+    }
+
+    .score-number span {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.9rem 0 1.1rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 60%;
+      border-radius: 999px;
+      background: var(--primary);
+      transition: width 0.25s ease, background 0.25s ease;
+    }
+
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .badge-pass { background: var(--success-bg); color: var(--success); }
+    .badge-fail { background: var(--danger-bg); color: var(--danger); }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+
+    .metrics-mini {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .mini-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .mini-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .mini-item strong {
+      font-size: 1.15rem;
+      color: var(--text);
+    }
+
+    .tip-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 0.85rem 1rem;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.9rem;
+      color: #1e3a8a;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      margin: 2.5rem 0 1rem;
+      font-weight: 700;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .chart-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .chart-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th { background: #f8fafc; font-weight: 700; }
+
+    .tables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .tables-grid { grid-template-columns: 1fr; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Predicting Student Performance</h1>
+    <p>Interactive Supervised Learning Demo — Predict a student's Final Exam Score (Regression) and Pass/Fail outcome (Classification) using trained Scikit-learn models.</p>
+    <div class="header-links">
+      <a class="btn-link btn-light" href="https://github.com/Lipaksh3/student-performance-prediction" target="_blank" rel="noopener">View GitHub Repository</a>
+      <a class="btn-link btn-outline" href="https://colab.research.google.com/github/Lipaksh3/student-performance-prediction/blob/main/notebooks/student_performance_analysis.ipynb" target="_blank" rel="noopener">Open in Google Colab</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid-main">
+      <!-- Input Controls -->
+      <section class="card">
+        <h2>Enter Student Details</h2>
+        <p class="subtitle">Move the sliders or pick a sample profile to see live predictions.</p>
+
+        <div class="presets">
+          <button class="preset-btn" type="button" onclick="applyPreset(6.0, 92, 84, 9, 7.5, true)">High Performer</button>
+          <button class="preset-btn" type="button" onclick="applyPreset(3.2, 74, 58, 6, 7.0, true)">Average Student</button>
+          <button class="preset-btn" type="button" onclick="applyPreset(1.0, 50, 38, 2, 5.0, false)">At-Risk Student</button>
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <label for="study_hours">Daily Study Hours</label>
+            <span class="control-value" id="val_study">3.5 hrs</span>
+          </div>
+          <input type="range" id="study_hours" min="0.5" max="8.0" step="0.1" value="3.5" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <label for="attendance_rate">Attendance Rate</label>
+            <span class="control-value" id="val_attendance">75%</span>
+          </div>
+          <input type="range" id="attendance_rate" min="40" max="100" step="1" value="75" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <label for="previous_score">Previous Exam Score</label>
+            <span class="control-value" id="val_previous">60 / 100</span>
+          </div>
+          <input type="range" id="previous_score" min="20" max="100" step="1" value="60" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <label for="assignments_completed">Assignments Completed</label>
+            <span class="control-value" id="val_assignments">6 / 10</span>
+          </div>
+          <input type="range" id="assignments_completed" min="1" max="10" step="1" value="6" />
+        </div>
+
+        <div class="control">
+          <div class="control-header">
+            <label for="sleep_hours">Daily Sleep Hours</label>
+            <span class="control-value" id="val_sleep">7.0 hrs</span>
+          </div>
+          <input type="range" id="sleep_hours" min="4.5" max="9.5" step="0.5" value="7.0" />
+        </div>
+
+        <div class="toggle-row">
+          <label for="extra_curricular">Participates in Extra-Curricular Activities</label>
+          <input type="checkbox" id="extra_curricular" checked />
+        </div>
+      </section>
+
+      <!-- Live Prediction Output -->
+      <section class="card">
+        <h2>Predicted Performance</h2>
+        <p class="subtitle">Powered by trained Linear Regression &amp; Logistic Regression weights.</p>
+
+        <div class="result-box">
+          <div class="score-label">Predicted Final Exam Score</div>
+          <div class="score-number" id="pred_score">61.6 <span>/ 100</span></div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress_fill"></div>
+          </div>
+          <div class="badges">
+            <span class="badge badge-pass" id="pred_badge">PASS</span>
+            <span class="badge badge-info" id="pred_grade">Grade: C</span>
+          </div>
+        </div>
+
+        <div class="metrics-mini">
+          <div class="mini-item">
+            <small>Pass Probability</small>
+            <strong id="pass_prob">97.2%</strong>
+          </div>
+          <div class="mini-item">
+            <small>Passing Benchmark</small>
+            <strong>50.0 / 100</strong>
+          </div>
+        </div>
+
+        <div class="tip-box" id="tip_box">
+          <strong>Insight:</strong> Increasing daily study hours and completing assignments consistently has the strongest impact on exam scores.
+        </div>
+      </section>
+    </div>
+
+    <!-- Model Benchmarks -->
+    <h2 class="section-title">Supervised Learning Model Benchmarks</h2>
+    <div class="tables-grid">
+      <div class="card">
+        <h2>Regression (Final Score)</h2>
+        <table>
+          <thead>
+            <tr><th>Algorithm</th><th>R² Score</th><th>MAE</th><th>RMSE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Linear Regression (Best)</strong></td><td><strong>0.8113</strong></td><td><strong>5.09</strong></td><td><strong>6.16</strong></td></tr>
+            <tr><td>Random Forest Regressor</td><td>0.7840</td><td>5.47</td><td>6.59</td></tr>
+            <tr><td>Decision Tree Regressor</td><td>0.6441</td><td>6.84</td><td>8.46</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>Classification (Pass / Fail)</h2>
+        <table>
+          <thead>
+            <tr><th>Algorithm</th><th>Accuracy</th><th>F1 Score</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Random Forest (Best)</strong></td><td><strong>91.00%</strong></td><td><strong>0.9448</strong></td></tr>
+            <tr><td>Logistic Regression</td><td>89.00%</td><td>0.9317</td></tr>
+            <tr><td>Decision Tree Classifier</td><td>82.00%</td><td>0.8861</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <h2 class="section-title">Evaluation Charts</h2>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Model Comparison</h3>
+        <img src="outputs/model_comparison.png" alt="Model Comparison Chart" />
+      </div>
+      <div class="chart-card">
+        <h3>Actual vs Predicted Final Score</h3>
+        <img src="outputs/actual_vs_predicted.png" alt="Actual vs Predicted Scatter Plot" />
+      </div>
+      <div class="chart-card">
+        <h3>Feature Correlation Heatmap</h3>
+        <img src="outputs/correlation_heatmap.png" alt="Correlation Heatmap" />
+      </div>
+      <div class="chart-card">
+        <h3>Feature Importance</h3>
+        <img src="outputs/feature_importance.png" alt="Feature Importance Chart" />
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Built with Python, Scikit-learn, Pandas &amp; Matplotlib •
+    <a href="https://github.com/Lipaksh3/student-performance-prediction" target="_blank" rel="noopener">GitHub Source Code</a>
+  </footer>
+
+  <script>
+    // Exact weights trained in Python (src/train_model.py) using scikit-learn
+    const LINEAR_REG = {
+      intercept: -20.934921,
+      study_hours: 4.894705,
+      attendance_rate: 0.266133,
+      previous_score: 0.361119,
+      assignments_completed: 1.742485,
+      sleep_hours: 1.891510,
+      extra_curricular: 1.969218
+    };
+
+    const LOGISTIC_REG = {
+      intercept: -23.847319,
+      study_hours: 1.542667,
+      attendance_rate: 0.088141,
+      previous_score: 0.127794,
+      assignments_completed: 0.651469,
+      sleep_hours: 0.567810,
+      extra_curricular: 0.660174
+    };
+
+    const inputs = [
+      "study_hours",
+      "attendance_rate",
+      "previous_score",
+      "assignments_completed",
+      "sleep_hours",
+      "extra_curricular"
+    ];
+
+    function getGrade(score) {
+      if (score >= 90) return "A+";
+      if (score >= 80) return "A";
+      if (score >= 70) return "B";
+      if (score >= 60) return "C";
+      if (score >= 50) return "D";
+      return "F";
+    }
+
+    function updatePrediction() {
+      const study = parseFloat(document.getElementById("study_hours").value);
+      const attendance = parseFloat(document.getElementById("attendance_rate").value);
+      const previous = parseFloat(document.getElementById("previous_score").value);
+      const assignments = parseInt(document.getElementById("assignments_completed").value, 10);
+      const sleep = parseFloat(document.getElementById("sleep_hours").value);
+      const extra = document.getElementById("extra_curricular").checked ? 1 : 0;
+
+      // Update labels
+      document.getElementById("val_study").textContent = `${study.toFixed(1)} hrs`;
+      document.getElementById("val_attendance").textContent = `${attendance}%`;
+      document.getElementById("val_previous").textContent = `${previous} / 100`;
+      document.getElementById("val_assignments").textContent = `${assignments} / 10`;
+      document.getElementById("val_sleep").textContent = `${sleep.toFixed(1)} hrs`;
+
+      // Regression prediction (Linear Regression)
+      let score =
+        LINEAR_REG.intercept +
+        LINEAR_REG.study_hours * study +
+        LINEAR_REG.attendance_rate * attendance +
+        LINEAR_REG.previous_score * previous +
+        LINEAR_REG.assignments_completed * assignments +
+        LINEAR_REG.sleep_hours * sleep +
+        LINEAR_REG.extra_curricular * extra;
+      score = Math.max(0, Math.min(100, score));
+
+      // Classification prediction (Logistic Regression sigmoid)
+      const logit =
+        LOGISTIC_REG.intercept +
+        LOGISTIC_REG.study_hours * study +
+        LOGISTIC_REG.attendance_rate * attendance +
+        LOGISTIC_REG.previous_score * previous +
+        LOGISTIC_REG.assignments_completed * assignments +
+        LOGISTIC_REG.sleep_hours * sleep +
+        LOGISTIC_REG.extra_curricular * extra;
+      const passProb = (1 / (1 + Math.exp(-logit))) * 100;
+      const isPass = score >= 50;
+
+      // Render UI
+      document.getElementById("pred_score").innerHTML = `${score.toFixed(1)} <span>/ 100</span>`;
+      document.getElementById("pass_prob").textContent = `${passProb.toFixed(1)}%`;
+      document.getElementById("pred_grade").textContent = `Grade: ${getGrade(score)}`;
+
+      const fill = document.getElementById("progress_fill");
+      fill.style.width = `${score}%`;
+      fill.style.background = score >= 75 ? "#16a34a" : score >= 50 ? "#2563eb" : "#dc2626";
+
+      const badge = document.getElementById("pred_badge");
+      badge.textContent = isPass ? "PASS" : "FAIL";
+      badge.className = `badge ${isPass ? "badge-pass" : "badge-fail"}`;
+
+      // Personalized tip
+      let tip = "Great balance across study habits! Keep maintaining consistency to score above 80.";
+      if (study < 2.5) {
+        tip = "Tip: Increasing daily study hours to at least 3–4 hours can boost your predicted score by 8–15 marks.";
+      } else if (attendance < 70) {
+        tip = "Tip: Improving class attendance above 80% strongly supports better exam performance.";
+      } else if (assignments < 6) {
+        tip = "Tip: Completing more assignments (8+/10) is an easy way to strengthen your final score.";
+      } else if (sleep < 6.5) {
+        tip = "Tip: Getting 7–8 hours of regular sleep helps memory retention and exam performance.";
+      }
+      document.getElementById("tip_box").innerHTML = `<strong>Insight:</strong> ${tip}`;
+    }
+
+    function applyPreset(study, attendance, previous, assignments, sleep, extra) {
+      document.getElementById("study_hours").value = study;
+      document.getElementById("attendance_rate").value = attendance;
+      document.getElementById("previous_score").value = previous;
+      document.getElementById("assignments_completed").value = assignments;
+      document.getElementById("sleep_hours").value = sleep;
+      document.getElementById("extra_curricular").checked = extra;
+      updatePrediction();
+    }
+
+    inputs.forEach(id => {
+      document.getElementById(id).addEventListener("input", updatePrediction);
+      document.getElementById(id).addEventListener("change", updatePrediction);
+    });
+
+    updatePrediction();
+  </script>
+</body>
+</html>
